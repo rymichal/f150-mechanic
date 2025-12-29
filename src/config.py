@@ -16,6 +16,18 @@ class Config:
     # Default settings
     DEFAULT_LOCATION = "Grand Rapids, Michigan"
 
+    # PDF/RAG settings
+    PDF_DIRECTORY = os.path.join(os.path.dirname(__file__), "pdf")
+    F150_MANUAL_PATH = os.path.join(PDF_DIRECTORY, "2018-Ford-F-150-Owners-Manual-version-5_om_EN-US_09_2018.pdf")
+
+    # Chunking settings
+    CHUNK_SIZE = 1000  # Characters per chunk
+    CHUNK_OVERLAP = 200  # Overlap between chunks to preserve context
+
+    # Embedding settings
+    EMBEDDING_MODEL = "nomic-embed-text"  # Ollama embedding model
+    # Other good options: mxbai-embed-large, all-minilm
+
     # LLM settings
     LLM_MODEL = OLLAMA_MODEL  # Use the model from environment
     LLM_TEMPERATURE = 0
