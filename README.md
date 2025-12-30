@@ -1,14 +1,13 @@
-# LangChain Weather Agent Tutorial
+# LangChain F150 Agent Tutorial
 
-A basic AI agent built with LangChain and Claude that can check the weather for any location.
+A basic AI agent built with LangChain and Ollama that can advise on using a ford f150 truck.
 
 ## Features
 
-- Check current weather for any city
-- Get weather for user's current location (defaults to Grand Rapids, Michigan)
-- Interactive chat interface
-- Uses Claude 3.5 Sonnet for natural language understanding
-- Integrates with OpenWeatherMap API for real-time weather data
+- RAG with f150 user manual.
+- Online searching
+- Connects to network Ollama instance for on-prem AI.
+- Defaults to use llama3.2 for natural language understanding
 
 ## Setup
 
