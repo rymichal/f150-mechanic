@@ -13,6 +13,9 @@ class Config:
     OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
     OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 
+    # API Keys
+    BRAVE_API_KEY = os.getenv("BRAVE_API_KEY")
+
     # Default settings
     DEFAULT_LOCATION = "Grand Rapids, Michigan"
 
