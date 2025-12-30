@@ -39,3 +39,11 @@ Run the F150 mechanic agent:
 uv run python main.py
 ```
 
+
+## Tests
+
+Tests do not run from the current location but they're annoying to save on the root. Move the test from the test directory to the root then run
+
+```bash
+uv run python <test_file>.py
+```
