@@ -8,20 +8,11 @@ from langchain_core.messages import HumanMessage
 from src.agent import create_f150_agent
 from src.config import Config
 from src.rag import create_vector_store
-from src.utils.token_counter import (
-    OllamaTokenCounter,
-    format_token_usage,
-    get_progress_bar,
-    get_warning_message
-)
+from src.utils.token_counter import OllamaTokenCounter, extract_and_display_token_usage
 
 
-def main():
-    """Run the F150 expert agent in interactive mode."""
-    # Validate configuration
-    if not Config.validate():
-        return
-
+def print_startup_banner():
+    """Print the startup initialization banner."""
     print("=" * 70)
     print("F150 EXPERT AGENT - INITIALIZING")
     print("=" * 70)
@@ -32,6 +23,61 @@ def main():
     print("  - Generating embeddings")
     print("  ⏳ This may take 15-30 seconds...")
     print()
+
+
+def print_welcome_message():
+    """Print the welcome message for the interactive loop."""
+    print("\n" + "=" * 70)
+    print("2018 Ford F-150 Expert Assistant")
+    print("=" * 70)
+    print("Ask me anything about your 2018 F-150!")
+    print("\nType 'quit' to exit")
+    print("=" * 70)
+
+
+def print_session_summary(token_counter: OllamaTokenCounter):
+    """Print the session summary when exiting."""
+    print("\n" + "=" * 70)
+    print("SESSION SUMMARY")
+    print("=" * 70)
+    summary = token_counter.get_summary()
+    print(f"Total tokens used: {summary['total_tokens']:,}")
+    print(f"  Prompt tokens: {summary['total_prompt_tokens']:,}")
+    print(f"  Completion tokens: {summary['total_completion_tokens']:,}")
+    print(f"Total interactions: {summary['total_interactions']}")
+    print(f"Final context usage: {summary['usage_percentage']:.1f}%")
+    print(f"Remaining tokens: {summary['remaining_tokens']:,}")
+    print("=" * 70)
+
+
+def read_input(token_counter):
+    """
+    Read user input and handle quit commands.
+
+    Args:
+        token_counter: Optional token counter for session summary
+
+    Returns:
+        User input string, or None if user wants to quit
+    """
+    user_input = input("\nYou: ").strip()
+
+    if user_input.lower() in ["quit", "exit", "q"]:
+        if token_counter:
+            print_session_summary(token_counter)
+        print("\nGoodbye!")
+        return None
+
+    return user_input
+
+
+def main():
+    """Run the F150 expert agent in interactive mode."""
+    # Validate configuration
+    if not Config.validate():
+        return
+
+    print_startup_banner()
 
     # Create the vector store on startup
     try:
@@ -58,80 +104,32 @@ def main():
     # Initialize token counter if enabled
     token_counter = None
     if Config.TOKEN_TRACKING_ENABLED:
-        token_counter = OllamaTokenCounter(
-            context_limit=Config.CONTEXT_LIMIT
-        )
+        token_counter = OllamaTokenCounter(context_limit=Config.CONTEXT_LIMIT)
         print("\n✓ Token tracking enabled (using Ollama actual counts)")
 
     # Interactive loop
-    print("\n" + "=" * 70)
-    print("2018 Ford F-150 Expert Assistant")
-    print("=" * 70)
-    print("Ask me anything about your 2018 F-150!")
-    print("\nType 'quit' to exit")
-    print("=" * 70)
+    print_welcome_message()
 
     while True:
-        user_input = input("\nYou: ").strip()
+        user_input = read_input(token_counter)
 
-        if user_input.lower() in ["quit", "exit", "q"]:
-            if token_counter:
-                print("\n" + "=" * 70)
-                print("SESSION SUMMARY")
-                print("=" * 70)
-                summary = token_counter.get_summary()
-                print(f"Total tokens used: {summary['total_tokens']:,}")
-                print(f"  Prompt tokens: {summary['total_prompt_tokens']:,}")
-                print(f"  Completion tokens: {summary['total_completion_tokens']:,}")
-                print(f"Total interactions: {summary['total_interactions']}")
-                print(f"Final context usage: {summary['usage_percentage']:.1f}%")
-                print(f"Remaining tokens: {summary['remaining_tokens']:,}")
-                print("=" * 70)
-            print("\nGoodbye!")
+        if user_input is None:
             break
 
         if not user_input:
             continue
 
         try:
-            # LangGraph agents expect messages format
+            # Invoke agent
             response = agent.invoke({"messages": [HumanMessage(content=user_input)]})
 
-            # Extract the final message from the agent
+            # Extract and display the final message
             final_message_obj = response["messages"][-1]
-            final_message = final_message_obj.content
-            print(f"\nF150 Expert:::\n{final_message}")
+            print(f"\nF150 Expert::::\n{final_message_obj.content}")
 
             # Track token usage if enabled
             if token_counter:
-                # Extract actual token counts from Ollama response
-                token_counts = token_counter.extract_token_counts(final_message_obj)
-
-                if token_counts:
-                    # Use actual Ollama token counts
-                    usage_stats = token_counter.track_interaction(
-                        prompt_tokens=token_counts['prompt_tokens'],
-                        completion_tokens=token_counts['completion_tokens']
-                    )
-
-                    print("\n" + "-" * 70)
-                    print("TOKEN USAGE (Ollama actual):")
-                    print(format_token_usage(usage_stats, show_details=True))
-
-                    # Display progress bar
-                    progress_bar = get_progress_bar(usage_stats['usage_percentage'])
-                    print(f"\nContext: {progress_bar}")
-
-                    # Display warning if needed
-                    warning = get_warning_message(usage_stats)
-                    if warning:
-                        print(f"\n{warning}")
-
-                    print("-" * 70)
-                else:
-                    # Ollama didn't return token counts
-                    print("\n⚠️  Token tracking unavailable - Ollama did not return token counts")
-                    print("    This may happen with some models or configurations.")
+                extract_and_display_token_usage(token_counter, final_message_obj)
 
         except Exception as e:
             print(f"\nError: {str(e)}")

@@ -44,27 +44,17 @@ def search_web(query: str) -> str:
         >>> search_web("frozen door latch problem")
         "Web search results for 'frozen door latch problem'..."
     """
+
+    print(f"\n🌐 Searching web for: '{query}'...")
+
     try:
         brave_search = _get_brave_search()
-
-        # Perform the search
         results = brave_search.run(query)
 
         if not results or results.strip() == "":
             return f"No web results found for: {query}"
 
-        # Format results for the agent
-        formatted_response = [
-            f"Web search results for '{query}':\n",
-            "=" * 70,
-            "\n",
-            results,
-            "\n",
-            "=" * 70,
-            "\nNote: Web search results should be verified for accuracy and safety."
-        ]
-
-        return "\n".join(formatted_response)
+        return results
 
     except ValueError as e:
         return f"Web search not configured: {str(e)}. Please add BRAVE_API_KEY to your .env file."

@@ -53,6 +53,9 @@ def search_f150_manual(question: str) -> str:
         >>> search_f150_manual("What is fuse 33 for?")
         "According to the manual, fuse 33 (15A) is for..."
     """
+
+    print("\n🔍 Searching F-150 manual...")
+
     if _vector_store is None:
         return "Error: Manual not loaded. Please restart the application."
 
@@ -64,14 +67,9 @@ def search_f150_manual(question: str) -> str:
 
     # Format the results for the LLM
     formatted_results = []
-    formatted_results.append("Here are the relevant sections from the F-150 Owner's Manual:\n")
-
     for i, doc in enumerate(results, 1):
         page = doc.metadata.get('page', 'unknown')
         content = doc.page_content.strip()
-
-        formatted_results.append(f"\n[Section {i} - Page {page}]")
-        formatted_results.append(content)
-        formatted_results.append("-" * 50)
+        formatted_results.append(f"[Section {i} - Page {page}]\n{content}\n")
 
     return "\n".join(formatted_results)

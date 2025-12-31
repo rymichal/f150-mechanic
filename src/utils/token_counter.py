@@ -213,3 +213,46 @@ def get_warning_message(usage_stats: Dict[str, Any]) -> Optional[str]:
         return "ℹ️  Context usage is moderate."
 
     return None
+
+
+def display_token_usage(usage_stats: Dict[str, Any]) -> None:
+    """
+    Display token usage statistics to the console.
+
+    Args:
+        usage_stats: Dictionary containing token usage statistics from track_interaction()
+    """
+    print("\n" + "-" * 70)
+    print("TOKEN USAGE (Ollama actual):")
+    print(format_token_usage(usage_stats, show_details=True))
+
+    # Display progress bar
+    progress_bar = get_progress_bar(usage_stats['usage_percentage'])
+    print(f"\nContext: {progress_bar}")
+
+    # Display warning if needed
+    warning = get_warning_message(usage_stats)
+    if warning:
+        print(f"\n{warning}")
+
+    print("-" * 70)
+
+
+def extract_and_display_token_usage(token_counter: "OllamaTokenCounter", response_message: BaseMessage) -> None:
+    """
+    Extract token counts from response and display usage statistics.
+
+    Args:
+        token_counter: The OllamaTokenCounter instance
+        response_message: The AIMessage object from the agent response
+    """
+    token_counts = token_counter.extract_token_counts(response_message)
+
+    if token_counts:
+        usage_stats = token_counter.track_interaction(
+            prompt_tokens=token_counts['prompt_tokens'],
+            completion_tokens=token_counts['completion_tokens']
+        )
+        display_token_usage(usage_stats)
+    else:
+        print("\n⚠️  Token tracking unavailable - Ollama did not return token counts")
