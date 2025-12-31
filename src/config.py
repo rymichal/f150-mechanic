@@ -35,6 +35,11 @@ class Config:
     LLM_MODEL = OLLAMA_MODEL  # Use the model from environment
     LLM_TEMPERATURE = 0
 
+    # Token tracking settings
+    TOKEN_TRACKING_ENABLED = True
+    CONTEXT_LIMIT = 128000  # Llama 3.2 has 128k context window
+    TOKEN_WARNING_THRESHOLD = 80.0  # Warn when reaching 80% of context
+
     @classmethod
     def get_ollama_base_url(cls) -> str:
         """Construct the Ollama base URL from host and port."""
