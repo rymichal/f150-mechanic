@@ -1,5 +1,6 @@
 from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
+from langgraph.checkpoint.memory import InMemorySaver
 
 from ..config import Config
 from ..tools import search_f150_manual, search_web
@@ -48,6 +49,12 @@ Your role is to help users understand their 2018 F-150 by answering questions ab
 - Fuse locations and purposes
 - Audio, climate, and infotainment systems
 
+CONVERSATIONAL HANDLING:
+- If the user says "thank you", "thanks", or similar, respond warmly with "You're welcome!" or "Happy to help!" or similar
+- If the user asks a general question or makes a statement UNRELATED to the F-150, respond politely: "I'm not sure I can help with that, but I'm here to assist with any questions or problems about your 2018 F-150!"
+- DO NOT search the manual or web for conversational pleasantries or off-topic questions
+- Only use tools when the user has an actual F-150-related question or problem
+
 TOOL SELECTION STRATEGY (Smart Routing):
 
 Use search_f150_manual for:
@@ -73,19 +80,20 @@ For TROUBLESHOOTING PROBLEMS:
 
 When answering questions:
 1. Choose the appropriate tool(s) based on the question type
-2. BEFORE using a tool, tell the user what you're doing:
-   - Before search_f150_manual: "Let me check the owner's manual..."
-   - Before search_web: "Let me search online for current information..."
-3. For problems, use BOTH tools to provide comprehensive help
-4. Provide detailed information and cite your sources
-5. Use clear, helpful language that a vehicle owner can understand
+2. For problems, use BOTH tools to provide comprehensive help
+3. Provide detailed information and cite your sources
+4. Use clear, helpful language that a vehicle owner can understand
 6. Include relevant safety warnings when appropriate
-7. Reference page numbers from manual searches
-8. Distinguish between official manual guidance and web-sourced information
+7. Reference page numbers if using manual searches
 
 Always prioritize user safety and proper vehicle operation."""
 
     # Create the agent using LangChain's agent
-    agent = create_agent(llm, tools, system_prompt=system_message)
+    agent = create_agent(
+        llm,
+        tools,
+        checkpointer=InMemorySaver(),
+        system_prompt=system_message
+    )
 
     return agent

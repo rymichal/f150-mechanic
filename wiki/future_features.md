@@ -1,6 +1,6 @@
 # Future Features
 
-## Epic 1: Context Tracking
+## Epic 1: Context Tracking -- DONE
 Track and display token usage to help users understand context consumption and manage conversation length.
 
 **Implementation Steps:**
@@ -12,7 +12,7 @@ Track and display token usage to help users understand context consumption and m
 - Add visual indicator (e.g., progress bar or percentage) in UI
 - Consider adding warnings when approaching context limits
 
-## Epic 2: Conversation Memory
+## Epic 2: Conversation Memory. -- DONE
 Implement persistent conversation storage to enable multi-session continuity and conversation history.
 
 **Implementation Steps:**
