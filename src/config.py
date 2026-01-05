@@ -40,6 +40,9 @@ class Config:
     CONTEXT_LIMIT = 128000  # Llama 3.2 has 128k context window
     TOKEN_WARNING_THRESHOLD = 80.0  # Warn when reaching 80% of context
 
+    # Human-in-the-loop settings
+    TOOL_APPROVAL_ENABLED = os.getenv("TOOL_APPROVAL_ENABLED", "false").lower() == "true"
+
     @classmethod
     def get_ollama_base_url(cls) -> str:
         """Construct the Ollama base URL from host and port."""

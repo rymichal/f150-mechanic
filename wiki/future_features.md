@@ -24,7 +24,10 @@ Implement persistent conversation storage to enable multi-session continuity and
 - Implement conversation search/filter capabilities
 - Add conversation export/import features
 
-## Epic 3: MCP (Model Context Protocol) Connection
+## Epic 3: Human-In-The-Loop
+Review best practice for langGraph Human-in-the-loop operations.  In our case before searching the web or the manual ask permission to do so.
+
+## Epic 4: MCP (Model Context Protocol) Connection
 Integrate MCP to enable standardized communication with external tools and data sources.
 
 **Implementation Steps:**
@@ -37,7 +40,7 @@ Integrate MCP to enable standardized communication with external tools and data 
 - Add error handling and reconnection logic
 - Test with common MCP servers (filesystem, database, etc.)
 
-## Epic 4: Database Connection
+## Epic 5: Database Connection
 Enable direct database connectivity for data retrieval and manipulation.
 
 **Implementation Steps:**
@@ -51,7 +54,7 @@ Enable direct database connectivity for data retrieval and manipulation.
 - Create database exploration tools (schema inspection, table listing)
 - Add query result caching (optional)
 
-## Epic 5: Serverless Function Triggers
+## Epic 6: Serverless Function Triggers
 Enable triggering of Azure Functions or AWS Lambda for external task execution.
 
 **Implementation Steps:**
@@ -67,4 +70,4 @@ Enable triggering of Azure Functions or AWS Lambda for external task execution.
 - Add support for passing parameters to functions
 - Handle different function response formats
 
-## Epic 6: Trigger Email
+## Epic 7: Trigger Email

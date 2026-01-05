@@ -185,7 +185,7 @@ BRAVE_API_KEY=your_brave_api_key_here
 
 ## Common Development Tasks
 
-### Running the Agents
+### Running Python
 
 ```bash
 # LangChain version (no persistent memory)
@@ -193,6 +193,9 @@ uv run python main.py
 
 # LangGraph version (with persistent memory)
 uv run python main_graph.py
+
+# Check Syntax with python
+uv run python -m py_compile src/agent/f150_agent.py
 ```
 
 ### Adding a New Tool

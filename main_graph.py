@@ -4,9 +4,11 @@ import warnings
 warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality")
 
 from langchain_core.messages import HumanMessage
+from langgraph.types import Command
 
 # Use the LangGraph-based agent
 from src.graph.f150_graph import create_f150_graph
+from src.utils.approval_node import format_approval_prompt_for_cli
 from src.config import Config
 from src.rag import create_vector_store
 
@@ -31,6 +33,8 @@ def print_welcome_message():
     print("=" * 70)
     print("Ask me anything about your 2018 F-150!")
     print("   Your conversation history is preserved across messages!")
+    if Config.TOOL_APPROVAL_ENABLED:
+        print("   [HITL Mode: You will be asked to approve tool calls]")
     print("\nType 'quit' to exit")
     print("=" * 70)
 
@@ -131,11 +135,40 @@ def main():
             continue
 
         try:
-            # Invoke LangGraph agent with conversation memory (pass config with thread_id)
+            # Invoke LangGraph agent with conversation memory
+            config = {"configurable": {"thread_id": "1"}}
             response = agent.invoke(
                 {"messages": [HumanMessage(content=user_input)]},
-                {"configurable": {"thread_id": "1"}}
+                config
             )
+
+            # Check if execution was interrupted for approval
+            while response.get("__interrupt__"):
+                interrupt_data = response["__interrupt__"][0].value
+
+                # Format and display the approval request
+                approval_prompt = format_approval_prompt_for_cli(interrupt_data)
+                print(approval_prompt, end="")
+
+                # Get user's approval decision
+                approval_input = input().strip().lower()
+
+                if approval_input in ['y', 'yes']:
+                    # Approve - resume with True
+                    response = agent.invoke(
+                        Command(resume={"approved": True}),
+                        config
+                    )
+                elif approval_input in ['n', 'no']:
+                    # Reject - resume with False
+                    response = agent.invoke(
+                        Command(resume={"approved": False}),
+                        config
+                    )
+                else:
+                    print("Invalid input. Please enter 'y' or 'n'.")
+                    # Re-prompt (don't invoke, just loop to ask again)
+                    continue
 
             # Extract and display the final message
             final_message_obj = response["messages"][-1]
