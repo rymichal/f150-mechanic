@@ -15,6 +15,11 @@ class Config:
 
     # API Keys
     BRAVE_API_KEY = os.getenv("BRAVE_API_KEY")
+    LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
+
+    # LangSmith tracing settings
+    LANGSMITH_TRACING = os.getenv("LANGSMITH_TRACING", "false").lower() == "true"
+    LANGSMITH_PROJECT = os.getenv("LANGSMITH_PROJECT", "f150-expert-agent")
 
     # Default settings
     DEFAULT_LOCATION = "Grand Rapids, Michigan"

@@ -1,4 +1,5 @@
 import warnings
+import os
 
 # Suppress Pydantic v1 compatibility warning in Python 3.14
 warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality")
@@ -9,6 +10,32 @@ from src.agent import create_f150_agent
 from src.config import Config
 from src.rag import create_vector_store
 from src.utils.token_counter import OllamaTokenCounter, extract_and_display_token_usage
+
+
+def setup_langsmith_tracing():
+    """
+    Configure LangSmith tracing using environment variables.
+
+    LangGraph/LangChain automatically detect these environment variables
+    and enable tracing without requiring code changes to the agent.
+    """
+    if Config.LANGSMITH_TRACING:
+        if not Config.LANGSMITH_API_KEY:
+            print("⚠️  Warning: LANGSMITH_TRACING=true but LANGSMITH_API_KEY not set")
+            print("   Tracing will be disabled. Add your API key to .env file.")
+            return False
+
+        # Set environment variables that LangChain/LangGraph automatically detect
+        os.environ["LANGSMITH_TRACING"] = "true"
+        os.environ["LANGSMITH_API_KEY"] = Config.LANGSMITH_API_KEY
+        os.environ["LANGSMITH_PROJECT"] = Config.LANGSMITH_PROJECT
+
+        print(f"✓ LangSmith tracing enabled")
+        print(f"  Project: {Config.LANGSMITH_PROJECT}")
+        print(f"  View traces at: https://smith.langchain.com")
+        return True
+
+    return False
 
 
 def print_startup_banner():
@@ -76,6 +103,9 @@ def main():
     # Validate configuration
     if not Config.validate():
         return
+
+    # Set up LangSmith tracing if enabled
+    setup_langsmith_tracing()
 
     print_startup_banner()
 
