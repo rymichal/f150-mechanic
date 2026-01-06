@@ -43,6 +43,9 @@ class Config:
     # Human-in-the-loop settings
     TOOL_APPROVAL_ENABLED = os.getenv("TOOL_APPROVAL_ENABLED", "false").lower() == "true"
 
+    # Telemetry/Logging settings
+    TELEMETRY = os.getenv("TELEMETRY", "true").lower() == "true"
+
     @classmethod
     def get_ollama_base_url(cls) -> str:
         """Construct the Ollama base URL from host and port."""

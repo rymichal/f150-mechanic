@@ -10,6 +10,7 @@ import re
 from typing import Dict
 from langgraph.graph import MessagesState
 from langchain_core.messages import AIMessage, HumanMessage
+from src.config import Config
 
 
 def is_conversational_only(text: str) -> bool:
@@ -127,6 +128,9 @@ def create_conversational_filter_node(domain_name: str = "F-150"):
         Returns:
             Dict with messages and bypass_agent flag
         """
+        if Config.TELEMETRY:
+            print("\n🔍 PRE_FILTER: Checking if message is conversational...")
+
         messages = state["messages"]
 
         # Get the last user message
@@ -138,6 +142,8 @@ def create_conversational_filter_node(domain_name: str = "F-150"):
 
         # Check if it's conversational-only
         if last_user_message and is_conversational_only(last_user_message.content):
+            if Config.TELEMETRY:
+                print("  ✓ Conversational message detected - bypassing agent")
             response_text = get_conversational_response(last_user_message.content)
 
             # Customize response with domain name
@@ -150,6 +156,8 @@ def create_conversational_filter_node(domain_name: str = "F-150"):
             }
 
         # Not conversational-only, proceed to agent
+        if Config.TELEMETRY:
+            print("  ✓ Domain question detected - proceeding to agent")
         return {"bypass_agent": False}
 
     return pre_filter_node

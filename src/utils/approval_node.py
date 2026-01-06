@@ -8,7 +8,8 @@ interrupt() function to pause execution for human approval before tools execute.
 from typing import Dict
 from langgraph.types import interrupt
 from langchain_core.messages import AIMessage
-from src.graph.state import F150StateWithTokens
+from src.graph.state import F150StateWithDualContext
+from src.config import Config
 
 
 def create_approval_node(enabled: bool = True):
@@ -30,7 +31,7 @@ def create_approval_node(enabled: bool = True):
         >>> workflow.add_node("approval_gate", create_approval_node(enabled=True))
     """
 
-    def approval_node(state: F150StateWithTokens) -> Dict:
+    def approval_node(state: F150StateWithDualContext) -> Dict:
         """
         Approval gate node that requests human approval for tool execution.
 
@@ -50,6 +51,9 @@ def create_approval_node(enabled: bool = True):
         if not enabled:
             return {}
 
+        if Config.TELEMETRY:
+            print("\n✋ APPROVAL_GATE: Requesting human approval for tool execution...")
+
         messages = state["messages"]
         last_message = messages[-1]
 
@@ -60,6 +64,10 @@ def create_approval_node(enabled: bool = True):
 
         # Build approval prompt with tool details
         tool_calls = last_message.tool_calls
+        if Config.TELEMETRY:
+            tool_names = [tc.get('name') for tc in tool_calls]
+            print(f"  Tools requested: {tool_names}")
+
         approval_prompt = _build_approval_prompt(tool_calls)
 
         # Interrupt execution and wait for human decision
@@ -70,6 +78,8 @@ def create_approval_node(enabled: bool = True):
         # Handle the approval decision
         if approval_decision is False or (isinstance(approval_decision, dict) and approval_decision.get("approved") is False):
             # Tools rejected - inject message telling agent to respond without tools
+            if Config.TELEMETRY:
+                print("  ✗ Tools rejected - agent will respond without tools")
             rejection_message = AIMessage(
                 content="[SYSTEM: The requested tool calls were not approved. Please respond to the user's question directly without using tools.]",
                 tool_calls=[]  # Clear tool calls
@@ -77,6 +87,8 @@ def create_approval_node(enabled: bool = True):
             return {"messages": [rejection_message]}
 
         # Tools approved - continue to tool execution
+        if Config.TELEMETRY:
+            print("  ✓ Tools approved - proceeding to execution")
         return {}
 
     return approval_node

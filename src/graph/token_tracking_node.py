@@ -8,7 +8,8 @@ based on context usage.
 
 from typing import Dict
 from langchain_core.messages import AIMessage, SystemMessage
-from src.graph.state import F150StateWithTokens
+from src.graph.state import F150StateWithDualContext
+from src.config import Config
 
 
 def create_token_tracking_node(context_limit: int = 128000, warning_threshold: float = 80.0):
@@ -33,7 +34,7 @@ def create_token_tracking_node(context_limit: int = 128000, warning_threshold: f
         >>> workflow.add_node("token_tracker", create_token_tracking_node(128000, 80.0))
     """
 
-    def token_tracking_node(state: F150StateWithTokens) -> Dict:
+    def token_tracking_node(state: F150StateWithDualContext) -> Dict:
         """
         Token tracking node that processes the last AI message.
 
@@ -47,6 +48,9 @@ def create_token_tracking_node(context_limit: int = 128000, warning_threshold: f
         Returns:
             Dictionary with updated token counts and optional warning message
         """
+        if Config.TELEMETRY:
+            print("\n📊 TOKEN_TRACKER: Tracking token usage...")
+
         messages = state["messages"]
 
         # Find the last AI message with response metadata
@@ -57,6 +61,8 @@ def create_token_tracking_node(context_limit: int = 128000, warning_threshold: f
                 break
 
         if not last_ai_message:
+            if Config.TELEMETRY:
+                print("  (No AI message to track)")
             return {}  # No AI message to track
 
         # Extract token counts from Ollama metadata
