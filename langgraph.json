@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "f150_agent": "./src/graph/f150_graph.py:create_f150_graph"
+  },
+  "env": ".env"
+}

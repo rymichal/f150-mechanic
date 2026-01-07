@@ -3,7 +3,7 @@ name = "langchain-tutorial"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = "==3.13.5"
 dependencies = [
     "langchain>=0.3.0",
     "langchain-community>=0.3.0",
@@ -13,4 +13,9 @@ dependencies = [
     "pypdf>=5.1.0",
     "langchain-text-splitters>=0.3.0",
     "faiss-cpu>=1.7.4",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "langserve>=0.3.0",
+    "sse-starlette>=2.1.0",
+    "langgraph-cli[inmem]>=0.4.11",
 ]
