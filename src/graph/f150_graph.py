@@ -29,7 +29,7 @@ from src.tools import search_f150_manual, search_web
 from src.utils.conversational_filter import create_conversational_filter_node
 from src.utils.approval_node import create_approval_node
 from src.graph.state import F150StateWithDualContext
-from src.graph.token_tracking_node import create_token_tracking_node
+from src.utils.token_counter_graph import create_token_tracking_node
 from src.graph.rag_agent_node import create_agentic_rag_node
 from src.graph.chat_agent_node import create_chat_agent_node
 from src.prompts.system_prompt import F150_CHAT_AGENT_PROMPT

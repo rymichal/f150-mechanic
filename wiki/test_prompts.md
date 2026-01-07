@@ -7,6 +7,6 @@
   What does fuse 33 do?
 
 ## Test 3: Reference Pages
-  What page of the manual can i find information about fuses?
+  1) What page of the manual can i find information about fuses?
 
-  Expected answer: 335 - 33.
+  2) Can you format that in a table.

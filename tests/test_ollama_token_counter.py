@@ -1,6 +1,6 @@
 """Test script for Ollama token counter functionality."""
 
-from src.utils.token_counter import (
+from src.utils.token_counter_chain import (
     OllamaTokenCounter,
     format_token_usage,
     get_progress_bar,

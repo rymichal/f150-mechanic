@@ -1,3 +1,16 @@
+### Running Python
+
+```bash
+# LangChain version (no persistent memory)
+uv run python main_chain.py
+
+# LangGraph version (with persistent memory)
+uv run python main.py
+
+# Check Syntax with python
+uv run python -m py_compile src/agent/f150_agent.py
+```
+
 # Role Prompt
 
 You are an expert AI engineering building a langChain/langGraph application. Its primary object is to explore the uses and functionality of the technical stack and working with AI agents. The secondary objective is to build a AI agent that can assist users with using their ford f150 truck.
@@ -184,19 +197,6 @@ BRAVE_API_KEY=your_brave_api_key_here
 | **Memory Persistence** | ❌ Clears on restart | ✅ Survives restarts |
 
 ## Common Development Tasks
-
-### Running Python
-
-```bash
-# LangChain version (no persistent memory)
-uv run python main.py
-
-# LangGraph version (with persistent memory)
-uv run python main_graph.py
-
-# Check Syntax with python
-uv run python -m py_compile src/agent/f150_agent.py
-```
 
 ### Adding a New Tool
 

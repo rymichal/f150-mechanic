@@ -1,8 +1,8 @@
 """
-Token tracking node for LangGraph agents.
+Token tracking utilities for LangGraph agents.
 
-This module provides a node that tracks token usage from Ollama responses
-and integrates it into the LangGraph state, allowing for reactive behavior
+This module provides utilities for tracking token usage from Ollama responses
+and integrating it into LangGraph state, allowing for reactive behavior
 based on context usage.
 """
 
@@ -93,7 +93,7 @@ def create_token_tracking_node(context_limit: int = 128000, warning_threshold: f
         }
 
         # Display token usage to console
-        _display_token_usage(
+        display_token_usage(
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             interaction_tokens=prompt_tokens + completion_tokens,
@@ -104,7 +104,7 @@ def create_token_tracking_node(context_limit: int = 128000, warning_threshold: f
         )
 
         # Optional: Inject warning message if usage is high
-        warning_message = _get_warning_message(usage_percentage, remaining_tokens)
+        warning_message = get_warning_message(usage_percentage, remaining_tokens)
         if warning_message:
             updates["messages"] = [SystemMessage(content=warning_message)]
 
@@ -113,7 +113,7 @@ def create_token_tracking_node(context_limit: int = 128000, warning_threshold: f
     return token_tracking_node
 
 
-def _display_token_usage(
+def display_token_usage(
     prompt_tokens: int,
     completion_tokens: int,
     interaction_tokens: int,
@@ -143,13 +143,13 @@ def _display_token_usage(
     print(f"  Remaining: {remaining_tokens:,} tokens")
 
     # Display progress bar
-    progress_bar = _get_progress_bar(usage_percentage)
+    progress_bar = get_progress_bar(usage_percentage)
     print(f"\nContext: {progress_bar}")
 
     print("-" * 70)
 
 
-def _get_progress_bar(percentage: float, width: int = 40) -> str:
+def get_progress_bar(percentage: float, width: int = 40) -> str:
     """
     Create a visual progress bar for context usage.
 
@@ -175,7 +175,7 @@ def _get_progress_bar(percentage: float, width: int = 40) -> str:
     return bar
 
 
-def _get_warning_message(usage_percentage: float, remaining_tokens: int) -> str | None:
+def get_warning_message(usage_percentage: float, remaining_tokens: int) -> str | None:
     """
     Get a warning message if context usage is high.
 
