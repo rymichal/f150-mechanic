@@ -13,7 +13,35 @@ from langchain_core.messages import AIMessage, HumanMessage
 from src.config import Config
 
 
-def is_conversational_only(text: str) -> bool:
+def _extract_text_content(content) -> str:
+    """
+    Extract text from message content, handling both string and list formats.
+
+    LangGraph API can send multimodal messages where content is a list of
+    content blocks (e.g., [{"type": "text", "text": "hello"}]) rather than
+    a plain string.
+
+    Args:
+        content: Either a string or a list of content blocks
+
+    Returns:
+        The extracted text as a string
+    """
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        # Extract text from content blocks
+        text_parts = []
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                text_parts.append(block.get("text", ""))
+            elif isinstance(block, str):
+                text_parts.append(block)
+        return " ".join(text_parts)
+    return str(content)
+
+
+def is_conversational_only(text) -> bool:
     """
     Detect if a message is purely conversational (no domain-specific question).
 
@@ -21,7 +49,7 @@ def is_conversational_only(text: str) -> bool:
     that don't require tool usage or complex LLM reasoning.
 
     Args:
-        text: The user's message text
+        text: The user's message text (string or list of content blocks)
 
     Returns:
         True if the message is conversational-only, False otherwise
@@ -34,7 +62,8 @@ def is_conversational_only(text: str) -> bool:
         >>> is_conversational_only("Great!")
         True
     """
-    text_lower = text.lower().strip()
+    text_str = _extract_text_content(text)
+    text_lower = text_str.lower().strip()
 
     # Patterns for conversational-only messages
     conversational_patterns = [
@@ -65,17 +94,18 @@ def is_conversational_only(text: str) -> bool:
     return False
 
 
-def get_conversational_response(text: str) -> str:
+def get_conversational_response(text) -> str:
     """
     Generate an appropriate canned response for conversational messages.
 
     Args:
-        text: The user's conversational message
+        text: The user's conversational message (string or list of content blocks)
 
     Returns:
         An appropriate response string
     """
-    text_lower = text.lower().strip()
+    text_str = _extract_text_content(text)
+    text_lower = text_str.lower().strip()
 
     # Response mapping based on message type
     response_map = {

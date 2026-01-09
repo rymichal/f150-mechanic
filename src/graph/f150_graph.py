@@ -22,7 +22,7 @@ from typing import Literal
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 from langchain_ollama import ChatOllama
-from langgraph.checkpoint.memory import InMemorySaver
+# InMemorySaver not needed - LangGraph API provides persistence
 
 from src.config import Config
 from src.tools import search_f150_manual, search_web
@@ -33,6 +33,21 @@ from src.utils.token_counter_graph import create_token_tracking_node
 from src.graph.rag_agent_node import create_agentic_rag_node
 from src.graph.chat_agent_node import create_chat_agent_node
 from src.prompts.system_prompt import F150_CHAT_AGENT_PROMPT
+
+
+# Module-level lazy singleton for vector store
+_vector_store = None
+
+
+def _get_vector_store():
+    """Lazily initialize and return the vector store singleton."""
+    global _vector_store
+    if _vector_store is None:
+        from src.rag import create_vector_store
+        print("\n⏳ Loading F-150 manual (this may take 15-30 seconds)...")
+        _vector_store = create_vector_store()
+        print("✓ Manual loaded successfully!")
+    return _vector_store
 
 
 class NodeName(str, Enum):
@@ -58,11 +73,15 @@ def create_f150_graph(vector_store=None):
         6. TOKEN_TRACKER: Track token usage
 
     Args:
-        vector_store: FAISS vector store for RAG
+        vector_store: FAISS vector store for RAG. If None, will be lazily initialized.
 
     Returns:
         Compiled StateGraph
     """
+
+    # Use provided vector_store or lazily initialize
+    if vector_store is None:
+        vector_store = _get_vector_store()
 
     # Initialize the LLM
     llm = ChatOllama(
@@ -71,12 +90,12 @@ def create_f150_graph(vector_store=None):
         base_url=Config.get_ollama_base_url()
     )
 
-    checkpointer = InMemorySaver()
+    # Note: Don't use InMemorySaver() here - LangGraph API provides its own persistence
+    # checkpointer = InMemorySaver()  # Only needed for standalone main.py usage
 
     # Set vector store for the search_f150_manual tool
-    if vector_store is not None:
-        from src.tools import set_vector_store
-        set_vector_store(vector_store)
+    from src.tools import set_vector_store
+    set_vector_store(vector_store)
 
     # Configure tools - BOTH manual and web search
     tools = [search_f150_manual, search_web]
@@ -150,7 +169,12 @@ def create_f150_graph(vector_store=None):
     workflow.add_edge(NodeName.TOOLS, NodeName.AGENT)  # Loop back to agent
     workflow.add_edge(NodeName.TOKEN_TRACKER, END)
 
-    # Compile
-    graph = workflow.compile(checkpointer=checkpointer)
+    # Compile (no checkpointer - LangGraph API provides persistence)
+    graph = workflow.compile()
 
     return graph
+
+
+# Pre-built graph instance for LangGraph API
+# This is created once when the module is imported by `langgraph dev`
+graph = create_f150_graph()
